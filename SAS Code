@@ -1,0 +1,1342 @@
+/****************************************************************************************************
+  *   Programmer: Josh Neudorf                                                                     *
+  *   Date: August 2015                                                                                *
+  *   Purpose: Link DIABETES datasets to CCHS Link File                                   *
+  ****************************************************************************************************/
+  
+  %let cchslnk=link.cchs_link;
+  
+  data cchs1;
+  set cchs11.cchsshare11;
+  if geoa_prv=47;
+  keep 
+  /*ID variables*/
+    SAMPLEID  /*Sample ID*/
+    PERSONID /*Person ID*/
+    SDCA_7L	/*Aboriginal Identity*/
+    PACADPAI /*Physical Activity Index*/EDUDR04 /*education*/
+    EDUADR04 /*education*/
+    HWTADSW/*bmi*/
+    DHHA_MS/*marital*/
+    INCADHH/*income*/
+    INCA_3 /*income - best estimate*/
+    LBFADWSS/*employment*/
+    GEOA_PC  /*Postal Code*/   
+    GEOA_PRV  /*Province = Sask=47*/
+      wtsa_s  /*Weight variable (NOT BOOTSTRAP WEIGHT)*/
+      DHHA_AGE  /*AGE*/  
+      DHHA_SEX  /*SEX*/
+      GEOADCSD /*Census Subdivision*/
+      /*GEOADEA /*Enumeration area*/ /*not in other cycles*/
+      GEOA_HR4 /*Health region*/
+      GEOADUR2 /*urban or rural*/
+      CCCA_101 /*has diabetes*/
+      ;  
+    
+    if SDCA_7L>=7 then SDCA_7L=9;
+    
+    rename
+    /*Renaming smoking from 1.1 to 4.1+ variable name*/
+      
+      /*ID variables*/
+      GEOA_PC=GEODPC                   
+      GEOA_PRV=GEO_PRV
+      GEOADCSD=GEODCSD
+      wtsa_s=wts_s
+      DHHA_AGE=DHH_AGE       
+      DHHA_SEX=DHH_SEX
+      GEOADUR2=GEODUR2 
+      CCCA_101=CCC_101
+      
+      /*Health Behaviours*/
+        PACADPAI=PACDPAI
+      SDCA_7L=SDCDABT
+      EDUADR04=EDUDR04 
+      HWTADSW=HWTDISW
+      DHHA_MS=DHH_MS
+      INCADHH=INCDHH
+      INCA_3=INC_3
+      LBFADWSS=lbsdwss
+      ;
+      run;
+      
+      data cchs1; set cchs1;
+      CYCLE="CYCLE1";
+      YEAR="Y2001";
+      GEODHR4=GEOA_HR4*1;
+      run;
+      
+      /*assigning da by postal code*/
+        data pc; set neudorf.pc_da;
+      keep pc da2006;
+      rename pc=geodpc;
+      run;
+      
+      proc sort data=cchs1; by geodpc;run;
+      proc sort data=pc; by geodpc;run;
+      
+      data cchs1; merge cchs1 (in=c) pc (in=p);
+      by geodpc;
+      GEODDA06=1*da2006;
+      drop da2006;
+      if c=1;
+      run;
+      
+      data cchs2;
+      set cchs21.cchsshare21;
+      if geoc_prv=47;
+      keep
+      /*ID variables*/
+        SAMPLEID  /*Sample ID*/
+        PERSONID /*Person ID*/
+        SDCC_7L	/*Aboriginal Identity*/
+        PACCDPAI /*Physical Activity Index*/
+        EDUCDR04 /*education*/
+        HWTCDISW/*bmi*/
+        DHHC_MS/*marital*/
+        INCCDHH/*income*/
+        INCC_3/*income - best estimate*/
+        LBFCDWSS/*employment*/
+        GEOC_PC  /*Postal Code*/   
+        GEOC_PRV  /*Province = Sask=47*/
+        WTSC_S  /*Weight variable (NOT BOOTSTRAP WEIGHT)*/
+        DHHC_AGE  /*AGE*/  
+        DHHC_SEX  /*SEX*/
+        GEOCDCSD /*Census Subdivision*/
+        GEOCDDA /*Dissemination area*/
+        GEOCDHR4 /*Health Region*/
+        GEOCDUR2 /*urban or rural*/
+        CCCC_101 /*has diabetes*/
+        ;
+      
+      if SDCC_7L>=7 then SDCC_7L=9;
+      
+      rename
+      /*Renaming smoking from 1.1 to 4.1+ variable name*/
+        /*ID variables*/
+        GEOCDPC=GEODPC                  
+      GEOC_PRV=GEO_PRV
+      WTSC_S=wts_s
+      DHHC_AGE=DHH_AGE    
+      DHHC_SEX=DHH_SEX
+      GEOCDCSD=GEODCSD
+      GEOCDDA=GEODDA06
+      GEOCDHR4=GEODHR4
+      GEOCDUR2=GEODUR2
+      CCCC_101=CCC_101
+      /*Health Behaviours*/
+        SDCC_7L=SDCDABT
+      PACCDPAI=PACDPAI
+      EDUCDR04=EDUDR04
+      HWTCDISW=HWTDISW
+      DHHC_MS=DHH_MS
+      INCCDHH=INCDHH
+      INCC_3=INC_3
+      LBFCDWSS=lbsdwss
+      ;
+      run;
+      data cchs2; set cchs2;
+      CYCLE="CYCLE2";
+      YEAR="Y2003";
+      run;
+      
+      data cchs3;
+      set cchs31.cchsshare31;
+      if geoe_prv=47;
+      keep
+      /*ID variables*/
+        SAMPLEID  /*Sample ID*/
+        PERSONID /*Person ID*/
+        SDCE_7L	/*Aboriginal Identity*/
+        PACEDPAI /*Physical Activity Index*/
+        EDUEDR04 /*education*/
+        HWTEDISW/*bmi*/
+        DHHE_MS/*marital*/
+        INCEDHH/*income*/
+        INCE_3 /*income - best estimate*/
+        LBSEDWSS/*employment*/
+        GEOEDPC  /*Postal Code*/   
+        GEOE_PRV  /*Province = Sask=47*/
+        wtse_s  /*Weight variable (NOT BOOTSTRAP WEIGHT)*/
+        DHHE_AGE  /*AGE*/  
+        DHHE_SEX  /*SEX*/
+        GEOEDCSD /*Census Subdivision*/
+        GEOEDDA /*Dissemination area*/
+        GEOEDHR4  /*Health region*/
+        GEOEDUR2 /*urban or rural*/
+        CCCE_101 /*has diabetes*/
+        ;
+      
+      rename
+      
+      /*ID variables*/
+        GEOEDPC=GEODPC                  
+      GEOE_PRV=GEO_PRV
+      wtse_s=wts_s
+      DHHE_AGE=DHH_AGE    
+      DHHE_SEX=DHH_SEX 
+      GEOEDCSD=GEODCSD
+      GEOEDDA=GEODDA06
+      GEOEDHR4=GEODHR4
+      GEOEDUR2=GEODUR2
+      CCCE_101=CCC_101
+      /*Health Behaviours*/
+        SDCE_7L=SDCDABT
+      PACEDPAI=PACDPAI
+      EDUEDR04=EDUDR04
+      HWTEDISW=HWTDISW
+      DHHE_MS=DHH_MS
+      INCEDHH=INCDHH
+      INCE_3=INC_3
+      LBSEDWSS=LBSDWSS
+      ; 
+      run;
+      data cchs3; set cchs3;
+      CYCLE="CYCLE3";
+      YEAR="Y2005";
+      run;
+      /*we want to split cycles 4 and 5 so that we can put 4 in the first analysis time period and 5 in the second*/
+        data cchs4;
+      set cchs4.cchsshare41;
+      if geo_prv=47;
+      keep
+      /*ID variables*/
+        SAMPLEID  /*Sample ID*/
+        PERSONID /*Person ID*/
+        SDCDABT	/*Aboriginal Identity*/
+        PACDPAI	/*Physical Activity Index*/
+        EDUDR04 /*education*/
+        HWTDISW/*bmi*/
+        DHH_MS/*marital*/
+        INCDHH/*income*/
+        INC_3 /*income - best estimate*/
+        lbsdwss/*employment*/
+        GEODPC  /*Postal Code*/   
+        GEO_PRV  /*Province = Sask=47*/
+        wts_s  /*Weight variable (NOT BOOTSTRAP WEIGHT)*/
+        DHH_AGE  /*AGE*/  
+        DHH_SEX  /*SEX*/
+        GEODCSD /*Census Subdivision*/
+        GEODDA06 /*Dissemination area*/
+        GEODHR4  /*Health region*/
+        GEODUR2 /*urban or rural*/
+        CCC_101 /*has diabetes*/
+        ;
+      run; 
+      
+      data cchs4; set cchs4;
+      CYCLE="CYCLE4";
+      YEAR="Y2007";
+      run;
+      
+      data cchs5;
+      set cchs5.cchsshare51;
+      if geo_prv=47;
+      keep
+      /*ID variables*/
+        SAMPLEID  /*Sample ID*/
+        PERSONID /*Person ID*/
+        SDCDABT	/*Aboriginal Identity*/
+        PACDPAI	/*Physical Activity Index*/
+        EDUDR04 /*education*/
+        HWTDISW/*bmi*/
+        DHH_MS/*marital*/
+        INCDHH/*income*/
+        lbsdwss/*employment*/
+        GEODPC  /*Postal Code*/   
+        GEO_PRV  /*Province = Sask=47*/
+        wts_s  /*Weight variable (NOT BOOTSTRAP WEIGHT)*/
+        DHH_AGE  /*AGE*/  
+        DHH_SEX  /*SEX*/
+        GEODCSD /*Census Subdivision*/
+        GEODDA06 /*Dissemination area*/
+        GEODHR4  /*Health region*/
+        GEODUR2 /*urban or rural*/
+        CCC_101 /*has diabetes*/
+        ;
+      run; 
+      
+      data cchs5; set cchs5;
+      CYCLE="CYCLE5";
+      YEAR="Y2008";
+      run;
+      
+      
+      data cchs6;
+      set cchs6.cchsshare6_1;
+      if geo_prv=47;
+      keep
+      /*ID variables*/
+        SAMPLEID  /*Sample ID*/
+        PERSONID /*Person ID*/
+        SDCDABT	/*Aboriginal Identity*/
+        PACDPAI	/*Physical Activity Index*/
+        EDUDR04 /*education*/
+        HWTDISW/*bmi*/
+        DHH_MS/*marital*/
+        INCDHH/*income*/
+        INC_3 /*income - best estimate*/
+        lbsdwss/*employment*/
+        GEODPC  /*Postal Code*/   
+        GEO_PRV  /*Province = Sask=47*/
+        wts_s  /*Weight variable (NOT BOOTSTRAP WEIGHT)*/
+        DHH_AGE  /*AGE*/  
+        DHH_SEX  /*SEX*/
+        GEODCSD /*Census Subdivision*/
+        GEODDA06 /*Dissemination area*/
+        GEODHR4  /*Health region*/
+        GEODUR2 /*urban or rural*/
+        CCC_101 /*has diabetes*/
+        ;
+      run; 
+      
+      data cchs6; set cchs6;
+      CYCLE="CYCLE6";
+      YEAR="Y2009";
+      run;
+      
+      
+      data cchs7;
+      set cchs7.cchsshare7_1;
+      if geo_prv=47;
+      keep
+      /*ID variables*/
+        SAMPLEID  /*Sample ID*/
+        PERSONID /*Person ID*/
+        SDCDABT	/*Aboriginal Identity*/
+        PACDPAI	/*Physical Activity Index*/
+        EDUDR04 /*education*/
+        HWTDISW/*bmi*/
+        DHH_MS/*marital*/
+        INCDHH/*income*/
+        INC_3 /*income - best estimate*/
+        lbsdwss/*employment*/
+        GEODPC  /*Postal Code*/   
+        GEO_PRV  /*Province = Sask=47*/
+        wts_s  /*Weight variable (NOT BOOTSTRAP WEIGHT)*/
+        DHH_AGE  /*AGE*/  
+        DHH_SEX  /*SEX*/
+        GEODCSD /*Census Subdivision*/
+        GEODDA06 /*Dissemination area*/
+        GEODHR4  /*Health region*/
+        GEODUR2 /*urban or rural*/
+        CCC_101 /*has diabetes*/
+        ;
+      run; 
+      
+      data cchs7; set cchs7;
+      CYCLE="CYCLE7";
+      YEAR="Y2010";
+      run;
+      
+      data cchs8;
+      set cchs8.cchs81_hs;
+      if geo_prv=47;
+      keep
+      /*ID variables*/
+        SAMPLEID  /*Sample ID*/
+        PERSONID /*Person ID*/
+        SDCDABT	/*Aboriginal Identity*/
+        PACDPAI	/*Physical Activity Index*/
+        EDUDR04 /*education*/
+        HWTDISW/*bmi*/
+        DHH_MS/*marital*/
+        INCDHH/*income*/
+        INC_3 /*income - best estimate*/
+        lbsdwss/*employment*/
+        GEODPC  /*Postal Code*/   
+        GEO_PRV  /*Province = Sask=47*/
+        wts_s  /*Weight variable (NOT BOOTSTRAP WEIGHT)*/
+        DHH_AGE  /*AGE*/  
+        DHH_SEX  /*SEX*/
+        GEODCSD /*Census Subdivision*/
+        GEODDA06 /*Dissemination area*/
+        GEODHR4  /*Health region*/
+        GEODUR2 /*urban or rural*/
+        CCC_101 /*has diabetes*/
+        ;
+      run; 
+      
+      data cchs8; set cchs8;
+      CYCLE="CYCLE8";
+      YEAR="Y2011";
+      run;
+      
+      data cchs9;
+      set cchs9.cchsshare91;
+      if geo_prv=47;
+      keep
+      /*ID variables*/
+        SAMPLEID /*Sample ID*/
+        PERSONID /*Person ID*/
+        SDCDABT	/*Aboriginal Identity*/
+        PACDPAI	/*Physical Activity Index*/
+        EDUDR04 /*education*/
+        HWTDISW/*bmi*/
+        DHH_MS/*marital*/
+        INCDHH/*income*/
+        INC_3 /*income - best estimate*/
+        lbsdwss/*employment*/
+        GEODPC  /*Postal Code*/   
+        GEO_PRV  /*Province = Sask=47*/
+        wts_s  /*Weight variable (NOT BOOTSTRAP WEIGHT)*/
+        DHH_AGE  /*AGE*/  
+        DHH_SEX  /*SEX*/
+        GEODCSD /*Census Subdivision*/
+        GEODDA06 /*Dissemination area*/
+        GEODHR4  /*Health region*/
+        GEODUR2 /*urban or rural*/
+        CCC_101 /*has diabetes*/
+        ;
+      run; 
+      
+      data cchs9; set cchs9;
+      CYCLE="CYCLE9";
+      YEAR="Y2012";
+      run;
+      data cchsskallses;
+      set cchs4 cchs5 cchs6 cchs7 cchs8 cchs9;
+      run; /*21,079*/
+        
+        /*Checking variables to make sure they are included in each cycle*/
+        
+        proc means data=cchsskallses;
+      by CYCLE;
+      run; 
+      
+      /******************************************************************************************/
+        /*Take combined CCHS data and multiple weights by proportion of cycles*/
+        /*Unweighted analysis assumes the weight=1. So divide 1 by number of cycles*/
+        /*Example: If using 2 cycles multiply by 0.5=1/2. If using all cycles multiply by 0.1=1/9.*/
+        /******************************************************************************************/
+        
+        /*Combining cycles 1 to 9 together*/
+        data cchs.cchsskallses1;
+      set cchsskallses;
+      wts=(wts_s*0.16667);
+      run;/*21,079*/
+        
+        
+        /*Convert the bootstrap text files to sas files*/
+        data cchsbootstrap1;
+      INFILE "/SAS_data/dw0/cchs/CCHS 1.1/Bootstrp/Data/b5.txt" LRECL=3529;
+      INPUT
+      @1   SAMPLEID	$20.
+      @21  PERSONID	2.
+      @23  FWGT            7.2
+      @30  (BSW1-BSW500) (500* 7.2);	
+      run;
+      
+      data cchsbootstrap2;
+      INFILE "/SAS_data/dw0/cchs/CCHS 2.1/Bootstrp/Data/b5.txt" LRECL=3529;
+      INPUT
+      @1   SAMPLEID	$20.
+      @21  PERSONID	2.
+      @23  FWGT            7.2
+      @30  (BSW1-BSW500) (500* 7.2);	
+      run;
+      
+      data cchsbootstrap3;
+      INFILE "/SAS_data/dw0/cchs/CCHS 3.1/Bootstrp/Data/b5.txt" LRECL=3529;
+      INPUT
+      @1   SAMPLEID	$20.
+      @21  PERSONID	2.
+      @23  FWGT            7.2
+      @30  (BSW1-BSW500) (500* 7.2);	
+      run;
+      
+      data cchsbootstrap4;
+      INFILE "/SAS_data/dw0/cchs/CCHS 4.1/Bootstrp/Data/b5.txt" LRECL=3529;
+      INPUT
+      @1   SAMPLEID	$20.
+      @21  PERSONID	2.
+      @23  FWGT            7.2
+      @30  (BSW1-BSW500) (500* 7.2);	
+      run;
+      
+      data cchsbootstrap5;
+      INFILE "/SAS_data/dw0/cchs/CCHS 5.1/Bootstrp/Data/b5.txt" LRECL=3529;
+      INPUT
+      @1   SAMPLEID	$20.
+      @21  PERSONID	2.
+      @23  FWGT            7.2
+      @30  (BSW1-BSW500) (500* 7.2);	
+      run;
+      
+      data cchsbootstrap6;
+      INFILE "/SAS_data/dw0/cchs/CCHS 6.1/Bootstrp/Data/b5.txt" LRECL=3529;
+      INPUT
+      @1   SAMPLEID	$20.
+      @21  PERSONID	2.
+      @23  FWGT            7.2
+      @30  (BSW1-BSW500) (500* 7.2);	
+      run;
+      
+      data cchsbootstrap7;
+      INFILE "/SAS_data/dw0/cchs/CCHS 7.1/Bootstrp/Data/b5.txt" LRECL=3529;
+      INPUT
+      @1   SAMPLEID	$20.
+      @21  PERSONID	2.
+      @23  FWGT            7.2
+      @30  (BSW1-BSW500) (500* 7.2);	
+      run;
+      
+      data cchsbootstrap8;
+      INFILE "/SAS_data/dw0/cchs/CCHS 8.1/Bootstrp/Data/b5.txt" LRECL=3529;
+      INPUT
+      @1   SAMPLEID	$20.
+      @21  PERSONID	2.
+      @23  FWGT            7.2
+      @30  (BSW1-BSW500) (500* 7.2);	
+      run;
+      
+      data cchsbootstrap9;
+      INFILE "/SAS_data/dw0/cchs/CCHS 9.1/Bootstrp/Data/b5.txt" LRECL=3529;
+      INPUT
+      @1   SAMPLEID	$20.
+      @21  PERSONID	2.
+      @23  FWGT            7.2
+      @30  (BSW1-BSW500) (500* 7.2);	
+      run;
+      
+      /*Append the bootstrap files and divide frequency weight variable by 9*/
+        /*This is the same procedure as above with the WTS_S variable*/
+        data cchsskallbootstrap;
+      set cchsbootstrap4 cchsbootstrap5 cchsbootstrap6 cchsbootstrap7 cchsbootstrap8 cchsbootstrap9;
+      FWGT1=(FWGT*0.1667);
+      drop FWGT;
+      rename FWGT1=FWGT;
+      run; /*361,126*/
+        
+        /*Merge the CCHS all file with the bootstrap all file for analysis without using BootVar*/
+        /*Need to sort before the merge*/
+        
+        proc sort data=cchs.cchsskallses1;
+      by SAMPLEID personid;
+      run; 
+      
+      proc sort data=cchsskallbootstrap;
+      by SAMPLEID personid;
+      run; 
+      
+      data cchs.cchskbootstrap;
+      merge cchs.cchsskallses1(in=cchs) cchsskallbootstrap (in=boot);
+      by SAMPLEID personid;
+      from_cchs=cchs;
+      from_boot=boot;
+      if cchs=1;
+      run; /*21,079*/
+        
+        /*CCHS cycle 4-9*/
+        data cycle (keep=SAMPLEID PERSONID GEO_PRV DHH_SEX DHH_AGE GEODPC WTS_S year INCDHH LBSDPFT EDUDR04);
+      set cchs.cchsskallses1;
+      run;/*21,079*/
+        
+        
+        /*CCHS Link File*/
+        data link (keep=SAMPLEID personid KEY_HSN LNK_PC DHH_SEX DHH_AGE REPORT_START
+                   rename=(DHH_SEX=sex DHH_AGE=age));
+      set &cchslnk;
+      run; /*41,468*/
+        
+        proc freq data=link;
+      tables report_start /nocol norow;
+      run;
+      
+      
+      /*Merge the cycle file with the link file to get key_hsn*/
+        PROC SORT DATA=link; BY SAMPLEID personid; RUN;
+      proc sort data=cycle; by sampleid personid; run;
+      
+      data m;
+      merge CYCLE(in=c) link (in=l);
+      by sampleid personid;
+      from_cchs=c;
+      from_link=l;
+      if c=1;
+      run; /*21,079*/
+        proc sort data=m; by sampleid personid; run;
+      
+      data new.cchs_merge;
+      set m;
+      if key_hsn ne ' ';
+      run;/*15,852 obs who have a key_hsn to link*/
+        
+        proc sort data=new.cchs_merge; by key_hsn year; run;
+      
+      *%macro linkToCCHS(disease,disease_short,inc_prev_type);
+      /*Link disease data to cchs*/
+        data diabetes (keep=key_hsn disease trueprev year);
+      set acsc.numer_dm_y2007 
+      acsc.numer_dm_y2008
+      acsc.numer_dm_y2009
+      acsc.numer_dm_y2010
+      acsc.numer_dm_y2011
+      acsc.numer_dm_y2012;
+      disease="dm";
+      if trueprev=1;
+      run;/*457059*/
+        
+        /*proc sort data=diabetes nodupkey; by key_hsn; run;*//*98121*/
+        proc sort data=diabetes; by key_hsn year; run;
+      
+      data NEW.admin_dm (KEEP=key_hsn sampleid personid disease year);
+      merge diabetes (in=d) new.cchs_merge (in=c);
+      by key_hsn year;
+      if c=1;
+      run;/*15852*/
+        
+        proc freq data=new.admin_dm nlevels;
+      tables disease;
+      run;/*1516*/
+        
+        /*removed duplicate hsn here since we want only the first year surveyed patient with indicator (except for injury)*/
+        proc sort data=NEW.admin_dm; by key_hsn year; run;
+      proc sort data=NEW.admin_dm nodupkey; by key_hsn; run;/*15720*/
+        
+        
+        proc freq data=new.admin_dm nlevels;
+      tables disease;
+      run; /*1498 diabetes people matched on key_hsn and year to cchs merge file*/
+        
+        /*proc freq data=new.admin_inj nlevels;
+      tables disease;
+      run;*/
+        
+        /*%mend linkToCCHS;
+      %linkToCCHS(diabetes,dm,trueprev);
+      %linkToCCHS(injury,injhos,prev);
+      %linkToCCHS(copd,copd,trueprev);
+      %linkToCCHS(mental,mental,trueprev);*/
+        
+        
+        
+        /*adding bootstrap data*/
+        
+        PROC FORMAT;
+      value agefmt
+      0-34  ='<35'
+      35-44  ='35-44'
+      45-59  ='45-59'
+      60-79  ='60-79'
+      80-high ='>80';
+      run;
+      
+      proc format;
+      value sexfmt
+      1='M'
+      2='F';
+      run;
+      
+      data cchsskbootstrap;                 /* file to be used with BOOTVARE_V31.SAS */
+        set cchs.cchskbootstrap;
+      if GEO_PRV IN (47);
+      keep SAMPLEID PERSONID YEAR GEODUR2 GEODDA06 DHH_SEX DHH_AGE WTS_S FWGT BSW1-BSW500 INCDHH lbsdwss EDUDR04;
+      FORMAT DHH_AGE AGEFMT. DHH_SEX SEXFMT.;
+      run; /*21,079 obs unweighted in total*/
+        
+        /*Merge the cycle file with the link file to get key_hsn*/
+        data link;
+      set new.link_file;
+      keep sampleid personid key_hsn;
+      run;/*41,468*/
+        
+        PROC SORT DATA=cchsskbootstrap; BY SAMPLEID personid; RUN;
+      proc sort data=link; by sampleid personid; run;
+      
+      data bs_key;
+      merge cchsskbootstrap(in=c) link (in=l);
+      by sampleid personid;
+      if c=1;
+      run; /*21,079*/
+        proc sort data=bs_key; by key_hsn year geodda06; run;
+      
+      *%macro final_data(disease);
+      
+      data admin_dm;
+      set NEW.admin_dm;
+      run;/*15720*/
+        /*Combine CCHS-admin data back to CCHS cycle data*/
+        proc sort data=admin_dm; by key_hsn year; run;
+      proc sort data=bs_key; by key_hsn year; run; 
+      
+      data trans1 (keep=key_hsn YEAR disease GEODUR2 GEODDA06 DHH_SEX DHH_AGE WTS_S FWGT BSW1-BSW500 INCDHH lbsdwss EDUDR04);
+      merge admin_dm (in=a) bs_key (in=t);
+      by key_hsn year;
+      if a=1;
+      if disease="dm" then outcome=1;
+      drop disease;
+      rename outcome=disease;
+      run;/*15,731 obs*/
+        proc sort data=trans1; by key_hsn year; run;
+      proc sort data=trans1 nodupkey; by key_hsn; run;/*15720*/
+        
+        data trans2 (keep=key_hsn YEAR disease GEODUR2 GEODDA06 DHH_SEX DHH_AGE WTS_S FWGT BSW1-BSW500 INCDHH lbsdwss EDUDR04 rename=(GEODDA06=DA) );
+      set trans1;
+      if disease=. then disease=0;
+      run; /*15,720 obs*/
+        
+        /*Merge area income with data file*/
+        proc sort data=trans2; by da; run;
+      proc sort data=new.area_inc; by DA; run; 
+      
+      
+      proc freq data=trans2 nlevels;
+      tables da;
+      run;
+      proc freq data=new.area_inc nlevels;
+      tables da;
+      run;
+      
+      data fgh (keep=key_hsn YEAR disease GEODUR2 DA DHH_SEX DHH_AGE WTS_S FWGT BSW1-BSW500 INCDHH lbsdwss EDUDR04);
+      merge new.area_inc(in=a) trans2 (in=t);
+      by DA;
+      if t=1;
+      run;/*15,720 obs*/
+        
+        proc freq data=fgh nlevels;
+      tables DA;
+      run;/*1413*/
+        
+        data dep;
+      set neudorf.final_pampalon_quint_2006;
+      rename DA2006=DA;
+      keep DA2006 sk_mat_quint sk_soc_quint sk_total_dep;
+      run;/*1520*/
+        
+        proc sort data=dep; by DA; run;
+      
+      proc sort data=fgh;	by DA; run;
+      
+      data new.final_dm;
+      merge fgh (in=f) dep (in=m);
+      by DA;
+      if f=1;	
+      IF INCDHH=1 OR INCDHH=2 OR INCDHH=3 OR INCDHH=4 OR INCDHH=5 OR INCDHH=6 THEN INCOME=1;
+      IF INCDHH=7 OR INCDHH=8 THEN INCOME=2;
+      IF INCDHH=9 or INCDHH=10 THEN INCOME=3;
+      IF INCDHH=11 or INCDHH=12 THEN INCOME=4;
+      if INCDHH=99 then INCOME=.;
+      
+      IF EDUDR04=1 THEN EDUCAT=1;
+      IF EDUDR04=2 OR EDUDR04=3 THEN EDUCAT=2;
+      IF EDUDR04=4 THEN EDUCAT=3;
+      IF EDUDR04=9 THEN EDUCAT=.;
+      
+      if lbsdwss=1 or lbsdwss=2 then employ=1;
+      if lbsdwss=3 or lbsdwss=4 then employ=2;
+      if lbsdwss=6 or lbsdwss=9 then employ=.;
+      
+      run;/*15,720*/
+        
+        
+        /*%mend final_data;
+      %final_data(dm);
+      %final_data(injhos);
+      %final_data(copd);
+      %final_data(mental);*/
+        
+
+        
+/****************************************************************************************************
+* Purpose: Descriptives of classification between individual and area income, and 
+*      Percent agreement between individual and area income                          
+****************************************************************************************************/
+
+      PROC FORMAT;
+      value agefmt
+      0-34  ='34'
+      35-44  ='35-44'
+      45-59  ='45-59'
+      60-79  ='60-79'
+      80-high ='80';
+      run;
+      
+      PROC FORMAT;
+      value yearfmt
+      2007  ='2007'
+      2008  ='2008'
+      2009  ='2009'
+      2010  ='2010'
+      2011  ='2011'
+      2012  ='2012';
+      run;
+      
+      proc format;
+      value sexfmt
+      1='M'
+      2='F';
+      run;
+      
+      proc format;
+      value edufmt
+      1='<high school'
+      2='high school grad'
+      3='post-sec'
+      9='Miss';
+      run;
+      
+      
+      proc format;
+      value bmifmt
+      1='neither'
+      2='overweight'
+      3='obese'
+      9='Miss';
+      run;
+      
+      proc format;
+      value marfmt
+      1='partnered'
+      2='widowed'
+      3='separated'
+      4='single'
+      9='Miss';
+      run;
+      
+      proc format;
+      value incfmt
+      1='<$20,000'
+      2='$20,000-$49,999'
+      3='$50,000-$79,999'
+      4='$80,000+'
+      9='Miss';
+      run;
+      
+      proc format;
+      value inc1fmt
+      1='<$20,000'
+      2='$20,000-$29,999'
+      3='$30,000-$39,999'
+      4='$40,000-$49,999'
+      5='$50,000-$59,999'
+      6='$60,000-$79,999'
+      7='$80,000-$99,999'
+      8='$100,000+'
+      9='Miss';
+      run;
+      
+      proc format;
+      value aborfmt
+      1='Aboriginal'
+      2='No Aboriginal'
+      9='Miss';
+      run;
+      
+      proc format;
+      value physfmt
+      1='Active'
+      2='Moderate'
+      3='Inactive'
+      9='Miss';
+      run;
+      
+      proc format;
+      value employfmt
+      1='employed'
+      2='unemployed'
+      9='Miss';
+      run;
+      
+      proc format;
+      value bmifmt
+      1='neither'
+      2='overweight'
+      3='obese'
+      9='Miss';
+      run;
+      
+      proc format;
+      value lanfmt
+      1='Urban'
+      2='Rural';
+      run;
+      
+      proc format;
+      value depfmt
+      1='least deprived'
+      2='2'
+      3='3'
+      4='4'
+      5='most deprived'
+      9='missing';
+      
+      proc format;
+      value dmfmt
+      1='has diabetes'
+      2='does not have diabetes';
+      run;
+      
+      /**********************************/
+        /*TABLE 1 -Characteristics of Study Population*/
+        
+        data working;
+      set new.final_dm;
+      if year = "Y2001" then yearn = 2001;
+      if year = "Y2003" then yearn = 2003;
+      if year = "Y2005" then yearn = 2005;
+      if year = "Y2007" then yearn = 2007;
+      if year = "Y2008" then yearn = 2008;
+      if year = "Y2009" then yearn = 2009;
+      if year = "Y2010" then yearn = 2010;
+      if year = "Y2011" then yearn = 2011;
+      if year = "Y2012" then yearn = 2012;
+      drop year;
+      rename yearn = year;
+      run;
+      
+      *num and denom setup for general counts based probability of disease;
+      
+      data working2;
+      set working;
+      if disease = 1 then disease1 = 1;
+      else if disease = 0 then disease1 = 0;
+      else disease1 = .;
+      if disease = 0 then disease0 = 1;
+      else if disease = 1 then disease0 = 0;
+      else disease0 = .;
+      run;
+      proc sort data=working2; by sk_total_dep geodur2 year; run;
+      * ns rural and urban;
+      ods listing close;
+      proc surveymeans data=working2 sum;
+      by sk_total_dep geodur2 year;
+      var disease1 disease0;
+      ods output Statistics=summed
+      run;
+      ods listing;
+      data summed;
+      set summed;
+      if VarName = "disease1" then disease1sum = sum;
+      if VarName = "disease0" then disease0sum = sum;
+      disease1sumlag = lag(disease1sum);
+      if disease0sum NE .;
+      rename disease1sumlag = num_n;
+      rename disease0sum = denom_n;
+      keep sk_total_dep geodur2 year VarName disease1sumlag disease0sum;
+      run;
+      * weighted urban and rural;
+      ods listing close;
+      proc surveymeans data=working2 sum;
+      by sk_total_dep geodur2 year;
+      var disease1 disease0;
+      weight WTS_S;
+      ods output Statistics=summed_w
+      run;
+      ods listing;
+      data summed_w;
+      set summed_w;
+      if VarName = "disease1" then disease1sum = sum;
+      if VarName = "disease0" then disease0sum = sum;
+      disease1sumlag = lag(disease1sum);
+      disease_prob = disease1sumlag/disease0sum;
+      if disease_prob NE .;
+      keep sk_total_dep geodur2 year VarName disease0sum disease1sumlag disease_prob;
+      run;
+      ods listing close;
+      * merge ns and weighted;
+      proc sort data=summed; by sk_total_dep geodur2 year VarName; run;
+      proc sort data=summed_w; by sk_total_dep geodur2 year VarName; run;
+      data summed_m;
+      merge summed summed_w;
+      by sk_total_dep geodur2 year VarName;
+      run;
+      
+      * provincial ;
+      * ns province;
+      proc surveymeans data=working2 sum;
+      by sk_total_dep year;
+      var disease1 disease0;
+      ods output Statistics=summed_all
+      run;
+      ods listing;
+      data summed_all;
+      set summed_all;
+      if VarName = "disease1" then disease1sum = sum;
+      if VarName = "disease0" then disease0sum = sum;
+      disease1sumlag = lag(disease1sum);
+      disease_prob = disease1sumlag/(disease1sumlag+disease0sum);
+      if disease_prob NE .;
+      geodur2 =  0;
+      rename disease0sum = denom_n;
+      rename disease1sumlag = num_n;
+      keep sk_total_dep geodur2 year VarName disease0sum disease1sumlag geodur2;
+      run;
+      *weighted province;
+      proc surveymeans data=working2 sum;
+      by sk_total_dep year;
+      var disease1 disease0;
+      weight WTS_S;
+      ods output Statistics=summed_all_w
+      run;
+      ods listing;
+      data summed_all_w;
+      set summed_all_w;
+      if VarName = "disease1" then disease1sum = sum;
+      if VarName = "disease0" then disease0sum = sum;
+      disease1sumlag = lag(disease1sum);
+      disease_prob = disease1sumlag/(disease1sumlag+disease0sum);
+      if disease_prob NE .;
+      geodur2 =  0;
+      keep sk_total_dep geodur2 year VarName disease0sum disease1sumlag disease_prob geodur2;
+      run;
+      *merge ns and weighted province;
+      proc sort data=summed_all; by sk_total_dep geodur2 year VarName; run;
+      proc sort data=summed_all_w; by sk_total_dep geodur2 year VarName; run;
+      data summed_all_m;
+      merge summed_all summed_all_w;
+      by sk_total_dep geodur2 year VarName;
+      run;
+      *merge rural urban and province;
+      proc sort data=summed_m; by sk_total_dep geodur2 year VarName; run;
+      proc sort data=summed_all_m; by sk_total_dep geodur2 year VarName; run;
+      data summed_urp;
+      merge summed_m summed_all_m;
+      by sk_total_dep geodur2 year VarName;
+      run;
+      * OUTPUT HERE ;
+      data new.prob_table_urp_dm;
+      set summed_urp;
+      run;
+      
+      *descriptive;
+      ods listing close;
+      proc surveyfreq data=working;
+      tables disease dhh_sex  dhh_age sk_total_dep geodur2 income educat;
+      format disease dmfmt. income incfmt. sk_total_dep depfmt. geodur2 lanfmt. dhh_sex sexfmt. educat edufmt.;
+      weight wts_s;
+      ods output OneWay=dm_freq;
+      run;
+      ods listing;
+      
+      proc freq data=working nlevels;
+      tables da;
+      run;
+      
+      
+      
+      /*glimmix with da as r int and all others in model statement*/
+        /*NULL model*/
+        proc glimmix data=working  method=mspl;
+      class da;
+      model disease(ref=first) = / solution dist=binary;
+      random int / subject=da;
+      weight wts_s;
+      covtest 'null model' indep;
+      title 'null model';
+      run;
+      
+      
+      proc sort data=working;
+      by sk_total_dep dhh_sex descending dhh_age year;
+      run;
+      /*model 1*/
+        proc glimmix data=working method=mspl;
+      class da  sk_total_dep dhh_sex dhh_age year;
+      model disease(ref=first) = sk_total_dep dhh_sex dhh_age year /solution dist=binary oddsratio;
+      random intercept / subject=da group=sk_total_dep;
+      weight wts_s;
+      title 'model1';
+      covtest / wald;
+      output out=m2pred pred(ilink)=p;
+      run;
+      
+      proc sort data=m2pred; by sk_total_dep geodur2 year; run;
+      ods listing close;
+      proc surveymeans data=m2pred mean;
+      by sk_total_dep geodur2 year;
+      var p;
+      ods output Statistics=m2meanp;
+      run;
+      ods listing;
+      proc sort data=m2pred; by sk_total_dep year; run;
+      ods listing close;
+      proc surveymeans data=m2pred mean;
+      by sk_total_dep year;
+      var p;
+      ods output Statistics=m1meanp;
+      run;
+      ods listing;
+      data m1meanp;
+      set m1meanp;
+      geodur2 = 0;
+      run;
+      
+      proc sort data=m1meanp; by sk_total_dep geodur2 year; run;
+      proc sort data=m2meanp; by sk_total_dep geodur2 year; run;
+      data meanp;
+      set m1meanp m2meanp;
+      run;
+      proc sort data=meanp; by sk_total_dep geodur2 year; run;
+      
+      
+      proc sort data=working;
+      by disease da sk_total_dep descending geodur2 dhh_sex descending dhh_age year;
+      run;
+      /*model 2*/
+        proc glimmix data=working method=mspl;
+      class da sk_total_dep geodur2 dhh_sex dhh_age year;
+      model disease(ref=first) = sk_total_dep geodur2 dhh_sex dhh_age year/solution dist=binary oddsratio;
+      random intercept / subject=da(geodur2) group=sk_total_dep;
+      weight wts_s;
+      title 'model2';
+      output out=m2pred pred(ilink)=p;
+      covtest / wald;
+      run;
+      
+      proc sort data=m2pred; by sk_total_dep geodur2 year; run;
+      ods listing close;
+      proc surveymeans data=m2pred mean;
+      by sk_total_dep geodur2 year;
+      var p;
+      ods output Statistics=m2meanp;
+      run;
+      ods listing;
+      proc sort data=m2pred; by sk_total_dep year; run;
+      ods listing close;
+      proc surveymeans data=m2pred mean;
+      by sk_total_dep year;
+      var p;
+      ods output Statistics=m1meanp;
+      run;
+      ods listing;
+      data m1meanp;
+      set m1meanp;
+      geodur2 = 0;
+      run;
+      
+      proc sort data=m1meanp; by sk_total_dep geodur2 year; run;
+      proc sort data=m2meanp; by sk_total_dep geodur2 year; run;
+      data meanp;
+      set m1meanp m2meanp;
+      run;
+      proc sort data=meanp; by sk_total_dep geodur2 year; run;
+      
+      /*model 2.1*/
+        proc glimmix data=working method=mspl;
+      class da sk_total_dep geodur2 dhh_sex dhh_age year INCOME educat /*employ*/;
+      model disease(ref=first) = sk_total_dep geodur2 dhh_sex dhh_age year INCOME educat /*employ*//solution dist=binary oddsratio;
+      random intercept / subject=da(geodur2) group=sk_total_dep;
+      weight wts_s;
+      format income incfmt. dhh_age agefmt. educat edufmt. /*employ employfmt.*/;
+      title 'model2 with income and education';
+      output out=m2pred pred(ilink)=p;
+      covtest / wald;
+      run;
+      
+      
+      proc sort data=m2pred; by sk_total_dep geodur2 year; run;
+      ods listing close;
+      proc surveymeans data=m2pred mean;
+      by sk_total_dep geodur2 year;
+      var p;
+      ods output Statistics=m2meanp;
+      run;
+      ods listing;
+      proc sort data=m2pred; by sk_total_dep year; run;
+      ods listing close;
+      proc surveymeans data=m2pred mean;
+      by sk_total_dep year;
+      var p;
+      ods output Statistics=m1meanp;
+      run;
+      ods listing;
+      data m1meanp;
+      set m1meanp;
+      geodur2 = 0;
+      run;
+      
+      proc sort data=m1meanp; by sk_total_dep geodur2 year; run;
+      proc sort data=m2meanp; by sk_total_dep geodur2 year; run;
+      data meanp;
+      set m1meanp m2meanp;
+      run;
+      proc sort data=meanp; by sk_total_dep geodur2 year; run;
+      
+      /*Log likelihood test between models*/
+        
+        
+        
+        
+        /*model 3*/
+        /*did not converge*/
+        proc glimmix data=working;
+      class da geodur2 sk_total_dep;
+      model disease(ref=first) = sk_total_dep geodur2 sk_total_dep*geodur2 dhh_sex dhh_age year/solution dist=binary oddsratio;
+      random intercept / subject=da(geodur2) group=sk_total_dep;
+      weight wts_s;
+      format dhh_age agefmt. dhh_sex sexfmt. sk_total_dep depfmt. geodur2 lanfmt. year yearfmt./*employ employfmt.*/;
+      title 'model3';
+      covtest / wald;
+      run;
+      
+      data urban;
+      set working;
+      if geodur2 = 1;
+      run;
+      data rural;
+      set working;
+      if geodur2 = 2;
+      run;
+      
+      /*model 4 (stratefied by geography*/
+                   /*Rural*/
+                   proc glimmix data=rural method=mspl;
+                 class da /*key_hsn*/ sk_total_dep dhh_sex dhh_age year;
+                 model disease(ref=first) = sk_total_dep dhh_sex dhh_age year/solution dist=binary oddsratio;
+                 random intercept / subject=da group=sk_total_dep;
+                 weight wts_s;
+                 title 'rural stratified';
+                 output out=m2pred pred(ilink)=p;
+                 run;
+                 
+                 
+                 proc sort data=m2pred; by sk_total_dep geodur2 year; run;
+                 ods listing close;
+                 proc surveymeans data=m2pred mean;
+                 by sk_total_dep geodur2 year;
+                 var p;
+                 ods output Statistics=m2meanp;
+                 run;
+                 ods listing;
+                 proc sort data=m2pred; by sk_total_dep year; run;
+                 ods listing close;
+                 proc surveymeans data=m2pred mean;
+                 by sk_total_dep year;
+                 var p;
+                 ods output Statistics=m1meanp;
+                 run;
+                 ods listing;
+                 data m1meanp;
+                 set m1meanp;
+                 geodur2 = 0;
+                 run;
+                 
+                 proc sort data=m1meanp; by sk_total_dep geodur2 year; run;
+                 proc sort data=m2meanp; by sk_total_dep geodur2 year; run;
+                 data meanp;
+                 set m1meanp m2meanp;
+                 run;
+                 proc sort data=meanp; by sk_total_dep geodur2 year; run;
+                 
+                 
+                 /*Urban*/
+                   proc glimmix data=urban method=mspl;
+                 class da sk_total_dep dhh_sex dhh_age year;
+                 model disease(ref=first) = sk_total_dep dhh_sex dhh_age year/solution dist=binary oddsratio;
+                 random intercept / subject=da group=sk_total_dep;
+                 weight wts_s;
+                 title 'urban stratified';
+                 output out=m2pred pred(ilink)=p;
+                 run;
+                 
+                 
+                 proc sort data=m2pred; by sk_total_dep geodur2 year; run;
+                 ods listing close;
+                 proc surveymeans data=m2pred mean;
+                 by sk_total_dep geodur2 year;
+                 var p;
+                 ods output Statistics=m2meanp;
+                 run;
+                 ods listing;
+                 proc sort data=m2pred; by sk_total_dep year; run;
+                 ods listing close;
+                 proc surveymeans data=m2pred mean;
+                 by sk_total_dep year;
+                 var p;
+                 ods output Statistics=m1meanp;
+                 run;
+                 ods listing;
+                 data m1meanp;
+                 set m1meanp;
+                 geodur2 = 0;
+                 run;
+                 
+                 proc sort data=m1meanp; by sk_total_dep geodur2 year; run;
+                 proc sort data=m2meanp; by sk_total_dep geodur2 year; run;
+                 data meanp;
+                 set m1meanp m2meanp;
+                 run;
+                 proc sort data=meanp; by sk_total_dep geodur2 year; run;
+                 
+                 /*model 4 (stratefied by geography) with income and education*/
+                   /*Rural*/
+                   proc glimmix data=rural method=mspl;
+                 class da /*key_hsn*/ sk_total_dep dhh_sex dhh_age year income educat;
+                 model disease(ref=first) = sk_total_dep dhh_sex dhh_age year income educat/solution dist=binary oddsratio;
+                 random intercept / subject=da group=sk_total_dep;
+                 weight wts_s;
+                 format income incfmt. educat edufmt.;
+                 title 'rural stratified with income and education';
+                 output out=m2pred pred(ilink)=p;
+                 run;
+                 
+                 
+                 proc sort data=m2pred; by sk_total_dep geodur2 year; run;
+                 ods listing close;
+                 proc surveymeans data=m2pred mean;
+                 by sk_total_dep geodur2 year;
+                 var p;
+                 ods output Statistics=m2meanp;
+                 run;
+                 ods listing;
+                 proc sort data=m2pred; by sk_total_dep year; run;
+                 ods listing close;
+                 proc surveymeans data=m2pred mean;
+                 by sk_total_dep year;
+                 var p;
+                 ods output Statistics=m1meanp;
+                 run;
+                 ods listing;
+                 data m1meanp;
+                 set m1meanp;
+                 geodur2 = 0;
+                 run;
+                 
+                 proc sort data=m1meanp; by sk_total_dep geodur2 year; run;
+                 proc sort data=m2meanp; by sk_total_dep geodur2 year; run;
+                 data meanp;
+                 set m1meanp m2meanp;
+                 run;
+                 proc sort data=meanp; by sk_total_dep geodur2 year; run;
+                 
+                 
+                 /*Urban*/
+                   proc glimmix data=urban method=mspl;
+                 class da sk_total_dep dhh_sex dhh_age year income educat;
+                 model disease(ref=first) = sk_total_dep dhh_sex dhh_age year income educat/solution dist=binary oddsratio;
+                 random intercept / subject=da group=sk_total_dep;
+                 weight wts_s;
+                 format income incfmt. educat edufmt.;
+                 title 'urban stratified with income and education';
+                 output out=m2pred pred(ilink)=p;
+                 run;
+                 
+                 proc sort data=m2pred; by sk_total_dep geodur2 year; run;
+                 ods listing close;
+                 proc surveymeans data=m2pred mean;
+                 by sk_total_dep geodur2 year;
+                 var p;
+                 ods output Statistics=m2meanp;
+                 run;
+                 ods listing;
+                 proc sort data=m2pred; by sk_total_dep year; run;
+                 ods listing close;
+                 proc surveymeans data=m2pred mean;
+                 by sk_total_dep year;
+                 var p;
+                 ods output Statistics=m1meanp;
+                 run;
+                 ods listing;
+                 data m1meanp;
+                 set m1meanp;
+                 geodur2 = 0;
+                 run;
+                 
+                 proc sort data=m1meanp; by sk_total_dep geodur2 year; run;
+                 proc sort data=m2meanp; by sk_total_dep geodur2 year; run;
+                 data meanp;
+                 set m1meanp m2meanp;
+                 run;
+                 proc sort data=meanp; by sk_total_dep geodur2 year; run;
+                 
